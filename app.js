@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 // This is what creates the todolist database and it opens it on port 27017.
-mongoose.connect("mongodb://localhost:27017/todolistDB", { useNewURLParser: true });
+mongoose.connect("mongodb://localhost:27017/todolistDB", { useUnifiedTopology: true });
 
 const itemsSchema = {
   name: String
@@ -19,7 +19,7 @@ const itemsSchema = {
 
 // Good practice to have mongoose models capitalized.
 // The first argument is the singular version of the collections name and the second argument is the schema you are going to use.
-const Item = mongoose.itemsSchema("Item", itemsSchema);
+const Item = mongoose.model("Item", itemsSchema);
 
 const item1 = new Item ({
   name: "Get food"
@@ -33,11 +33,21 @@ const item3 = new Item ({
   name: "Hit the + button to add a new item"
 });
 
+const defaultItems = [item1, item2, item3];
+
+Item.insertMany(defaultItems, function(err) {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log("Successfully saved default items to the database.");
+  }
+})
+
 app.get("/", function(req, res) {
 
   const day = date.getDate();
 
-  res.render("list", {listTitle: day, newListItems: items});
+  res.render("list", {listTitle: day, newListItems: defaultItems});
 
 });
 
