@@ -35,24 +35,26 @@ const item3 = new Item ({
 
 const defaultItems = [item1, item2, item3];
 
-Item.insertMany(defaultItems, function(err) {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("Successfully saved default items to the database.");
-  }
-})
-
 app.get("/", function(req, res) {
 
   const day = date.getDate();
 
-  // Empty curly braces means find all the items in the array.
+  // Empty curly braces means find all the items in the collection.
   Item.find({}, function(err, foundItems) {
-    if (err) {
-      console.log(err);
+
+    if (foundItems.length === 0) {
+      Item.insertMany(defaultItems, function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("Successfully saved default items to the database.");
+        }
+      });
+      // When the foundItems array is empty it will fall into the if statement and add the 3 default items to the list.
+      // Then we direct it back to the home route and it if the foundItems is not empty it will fall into the else statement and render the items on the page.
+      res.redirect("/");
     } else {
-      res.render("list", {listTitle: day, newListItems: foundItems});
+        res.render("list", {listTitle: day, newListItems: foundItems});
     }
   })
 
