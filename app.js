@@ -47,7 +47,14 @@ app.get("/", function(req, res) {
 
   const day = date.getDate();
 
-  res.render("list", {listTitle: day, newListItems: defaultItems});
+  // Empty curly braces means find all the items in the array.
+  Item.find({}, function(err, foundItems) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("list", {listTitle: day, newListItems: foundItems});
+    }
+  })
 
 });
 
