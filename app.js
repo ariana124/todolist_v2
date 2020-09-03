@@ -1,8 +1,7 @@
-//jshint esversion:6
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -11,12 +10,32 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-const items = ["Buy Food", "Cook Food", "Eat Food"];
-const workItems = [];
+// This is what creates the todolist database and it opens it on port 27017.
+mongoose.connect("mongodb://localhost:27017/todolistDB", { useNewURLParser: true });
+
+const itemsSchema = {
+  name: String
+};
+
+// Good practice to have mongoose models capitalized.
+// The first argument is the singular version of the collections name and the second argument is the schema you are going to use.
+const Item = mongoose.itemsSchema("Item", itemsSchema);
+
+const item1 = new Item ({
+  name: "Get food"
+});
+
+const item2 = new Item ({
+  name: "Complete the mongoose udemy module"
+});
+
+const item3 = new Item ({
+  name: "Hit the + button to add a new item"
+});
 
 app.get("/", function(req, res) {
 
-const day = date.getDate();
+  const day = date.getDate();
 
   res.render("list", {listTitle: day, newListItems: items});
 
