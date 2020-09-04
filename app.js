@@ -42,9 +42,9 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema);
 
-app.get("/", function(req, res) {
+const day = date.getDate();
 
-  const day = date.getDate();
+app.get("/", function(req, res) {
 
   // Empty curly braces means find all the items in the collection.
   Item.find({}, function(err, foundItems) {
@@ -70,16 +70,30 @@ app.get("/", function(req, res) {
 app.post("/", function(req, res){
 
   const itemName = req.body.newItem;
+  const listName = req.body.list;
+  console.log(listName)
 
   const item = new Item({
     name: itemName
   });
 
-  // This will save our item into our collection of items.
-  item.save();
+  if (listName === day) {
+    // This will save our item into our collection of items.
+    item.save();
 
-  // We redirect back to the home route in order to find the newly saved item in the array and render it on the page. 
-  res.redirect("/");
+    // We redirect back to the home route in order to find the newly saved item in the array and render it on the page. 
+    res.redirect("/");
+  } else {
+    List.findOne({name: listName}, function(err,  foundList) {
+      if (err) {
+        console.log(err);
+      } else {
+        foundList.items.push(item);
+        foundList.save();
+        res.redirect(`/${listName}`);
+      }
+    })
+  }
 
 });
 
