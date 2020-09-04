@@ -35,6 +35,13 @@ const item3 = new Item ({
 
 const defaultItems = [item1, item2, item3];
 
+const listSchema = {
+  name: String,
+  items: [itemsSchema]
+};
+
+const List = mongoose.model("List", listSchema);
+
 app.get("/", function(req, res) {
 
   const day = date.getDate();
@@ -77,6 +84,7 @@ app.post("/", function(req, res){
 });
 
 app.post("/delete", function(req, res) {
+
   const checkedItem = req.body.checkedBox;
 
   Item.findByIdAndRemove(checkedItem, function(err){
@@ -89,8 +97,30 @@ app.post("/delete", function(req, res) {
   })
 });
 
-app.get("/work", function(req,res){
-  res.render("list", {listTitle: "Work List", newListItems: workItems});
+app.get("/:listName", function(req,res){
+
+  const customList = req.params.listName;
+
+  List.findOne({name: customList}, function (err, foundList){
+    if (err) {
+      console.log(error);
+    } else {
+      if (foundList) {
+        // Show an existing list.
+        res.render("list", {listTitle: foundList.name, newListItems: foundList.items});
+      } else {
+        // Will create a new list.
+        const list = new List({
+          name: customList,
+          items: defaultItems
+        });
+
+        list.save();
+        res.redirect(`/${customList}`);
+      }
+    }
+  });
+
 });
 
 app.get("/about", function(req, res){
