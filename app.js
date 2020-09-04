@@ -62,15 +62,18 @@ app.get("/", function(req, res) {
 
 app.post("/", function(req, res){
 
-  const item = req.body.newItem;
+  const itemName = req.body.newItem;
 
-  if (req.body.list === "Work") {
-    workItems.push(item);
-    res.redirect("/work");
-  } else {
-    items.push(item);
-    res.redirect("/");
-  }
+  const item = new Item({
+    name: itemName
+  });
+
+  // This will save our item into our collection of items.
+  item.save();
+
+  // We redirect back to the home route in order to find the newly saved item in the array and render it on the page. 
+  res.redirect("/");
+
 });
 
 app.get("/work", function(req,res){
