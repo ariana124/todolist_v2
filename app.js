@@ -42,8 +42,6 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema);
 
-const day = date.getDate();
-
 app.get("/", function(req, res) {
 
   // Empty curly braces means find all the items in the collection.
@@ -61,7 +59,7 @@ app.get("/", function(req, res) {
       // Then we direct it back to the home route and it if the foundItems is not empty it will fall into the else statement and render the items on the page.
       res.redirect("/");
     } else {
-        res.render("list", {listTitle: day, newListItems: foundItems});
+        res.render("list", {listTitle: "Today", newListItems: foundItems});
     }
   })
 
@@ -77,7 +75,7 @@ app.post("/", function(req, res){
     name: itemName
   });
 
-  if (listName === day) {
+  if (listName === "Today") {
     // This will save our item into our collection of items.
     item.save();
 
@@ -100,15 +98,27 @@ app.post("/", function(req, res){
 app.post("/delete", function(req, res) {
 
   const checkedItem = req.body.checkedBox;
+  const listName = req.body.listName;
 
-  Item.findByIdAndRemove(checkedItem, function(err){
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Item was successfully deleted.")
-      res.redirect("/");
-    }
-  })
+  if (listName === "Today") {
+    Item.findByIdAndRemove(checkedItem, function(err){
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Item was successfully deleted.")
+        res.redirect("/");
+      }
+    })
+  } else {
+    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItem}}}, function (err, foundList) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect(`/${listName}`);
+      }
+    })
+  }
+
 });
 
 app.get("/:listName", function(req,res){
